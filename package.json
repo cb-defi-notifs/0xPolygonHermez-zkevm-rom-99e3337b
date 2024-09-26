@@ -1,6 +1,6 @@
 {
-  "name": "@0xpolygonhermez/zkrom",
-  "version": "1.1.0",
+  "name": "@0xpolygonhermez/zkevm-rom",
+  "version": "6.0.0",
   "description": "zkROM source code",
   "main": "index.js",
   "scripts": {
@@ -18,10 +18,13 @@
     "test:counters": "node counters/counters-executor.js",
     "test:calldatacopy": "mkdir -p build && npx zkasm test/opcalldatacopy.zkasm -o build/opcalldatacopy.test.json",
     "test:mstorex": "mkdir -p build && npx zkasm test/mstorex.zkasm -o build/mstorex.test.json",
-    "eslint": "npx eslint tools/**.js",
-    "eslint:fix": "npx eslint tools/**.js --fix",
-    "test:gen": "node tools/gen-parallel-tests.js",
-    "test:start": "npx mocha --jobs $NUM_CPUS --timeout 0 --max-old-space-size=8192 --parallel tools/parallel-tests/*.test.js"
+    "test:zkasm": "node tools/run-tests-zkasm.js ./test --helpers ../main/helper.js",
+    "eslint": "npx eslint tools/**.js && npx eslint counters/counters-executor.js",
+    "eslint:fix": "npx eslint tools/**.js --fix && npx eslint counters/counters-executor.js --fix",
+    "test:gen": "node tools/parallel-testing/gen-parallel-tests.js",
+    "test:start": "npx mocha --jobs $NUM_CPUS --timeout 0 --max-old-space-size=8192 --parallel \"tools/parallel-testing/parallel-tests/*.test.js\"",
+    "report:free-inputs": "node tools/audit-tools/free-inputs-checker.js",
+    "report:registry-op": "node tools/audit-tools/registry-op-checker.js"
   },
   "keywords": [
     "zkrom",
@@ -30,21 +33,24 @@
     "polygon"
   ],
   "author": "Jordi Baylina",
-  "license": "pending",
+  "license": "AGPL",
   "repository": {
     "type": "git",
     "url": "https://github.com/0xPolygonHermez/zkevm-rom.git"
   },
   "dependencies": {
-    "@0xpolygonhermez/zkasmcom": "https://github.com/0xPolygonHermez/zkasmcom.git#v1.0.0",
+    "@0xpolygonhermez/zkasmcom": "https://github.com/0xPolygonHermez/zkasmcom.git#v5.0.0-fork.8",
     "yargs": "^17.5.1"
   },
   "devDependencies": {
-    "@0xpolygonhermez/zkevm-proverjs": "github:0xPolygonHermez/zkevm-proverjs#95ca45eec5ae0a276c8f8feae7c89d8b06f2a385",
-    "@0xpolygonhermez/zkevm-testvectors": "github:0xPolygonHermez/zkevm-testvectors#v1.1.0-fork.4",
+    "@0xpolygonhermez/zkevm-commonjs": "github:0xPolygonHermez/zkevm-commonjs#v6.0.0-fork.9",
+    "@0xpolygonhermez/zkevm-proverjs": "github:0xPolygonHermez/zkevm-proverjs#b8c17caeb6fe1c234f2c1d2dba5c26c6c3951665",
+    "@0xpolygonhermez/zkevm-testvectors": "github:0xPolygonHermez/zkevm-testvectors#v6.0.1-fork.9",
     "chai": "^4.3.6",
     "chalk": "^3.0.0",
     "eslint": "^8.25.0",
-    "eslint-config-airbnb-base": "^15.0.0"
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-mocha": "^10.1.0",
+    "mocha": "^10.2.0"
   }
 }

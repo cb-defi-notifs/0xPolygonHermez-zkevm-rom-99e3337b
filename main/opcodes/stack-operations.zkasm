@@ -1,4 +1,23 @@
 /**
+ * @link [https://www.evm.codes/#5f?fork=shanghai]
+ * @zk-counters
+ *  - 100 steps
+ * @process-opcode
+ *  - stack input: none
+ *  - stack output: [0]
+ */
+opPUSH0:
+    ; checks zk-counters
+    %MAX_CNT_STEPS - STEP - 100     :JMPN(outOfCountersStep)
+
+    ; check out-of-gas
+    GAS - %GAS_QUICK_STEP => GAS    :JMPN(outOfGas)
+    ; store stack output
+    0                               :MSTORE(SP++); [0 => SP]
+    ; check stack overflow
+    %MAX_STACK_SIZE - SP           :JMPN(stackOverflow, readCode)
+
+/**
  * @link [https://www.evm.codes/#60?fork=berlin]
  * @zk-counters
  *  - 100 steps (stack) || 400 steps (calldata)
@@ -8,134 +27,101 @@
  *  - stack output: [pushed_value]
  */
 opPUSH1:
-    ; number of bytes to push to D
-    1 => D
     ; check is a deploy
     ; if is a deploy, get bytes from memory else, get bytes from stack
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH2:
-    2 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH3:
-    3 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH4:
-    4 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH5:
-    5 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH6:
-    6 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH7:
-    7 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH8:
-    8 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH9:
-    9 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH10:
-    10 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH11:
-    11 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH12:
-    12 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH13:
-    13 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH14:
-    14 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH15:
-    15 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH16:
-    16 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH17:
-    17 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH18:
-    18 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH19:
-    19 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH20:
-    20 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH21:
-    21 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH22:
-    22 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH23:
-    23 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH24:
-    24 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH25:
-    25 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH26:
-    26 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH27:
-    27 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH28:
-    28 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH29:
-    29 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH30:
-    30 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH31:
-    31 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opPUSH32:
-    32 => D
     $ => B                          :MLOAD(isCreateContract), JMPNZ(opAuxPUSHB, opAuxPUSHA)
 
 opAuxPUSHA:
@@ -150,11 +136,11 @@ opAuxPUSHA2:
     ; check out-of-gas
     GAS - %GAS_FASTEST_STEP => GAS      :JMPN(outOfGas)
     ; read bytes from calldata
-                        :CALL(readPush); in: [D: bytes to read] out: [E: value read]
+    D => E              :CALL(readPush); in: [D,E: bytes to read] out: [E: value read]
     ; store stack output
     E                   :MSTORE(SP++); [pushed_value(E) => SP]
     ; check stack overflow
-    %CALLDATA_OFFSET - SP           :JMPN(stackOverflow)
+    %MAX_STACK_SIZE - SP           :JMPN(stackOverflow)
     ; rectify PC
     PC + D => PC                    :JMP(readCode)
 
@@ -197,7 +183,7 @@ opAuxPUSHBend:
     ; store stack output (value)
     A                               :MSTORE(SP++); [pushed_value(E) => SP]
     ; check stack overflow
-    %CALLDATA_OFFSET - SP                       :JMPN(stackOverflow, readCode)
+    %MAX_STACK_SIZE - SP                       :JMPN(stackOverflow, readCode)
 
 opAuxPUSHBcreate:
     ; get bytes length
@@ -215,7 +201,7 @@ opAuxPUSHBcreate:
     B - PC => C                     :JMPZ(opfinalPUSHBcreate)
 
 opAuxPUSHBcreate2:
-    ; set length to read to C for MOLADX call
+    ; set length to read to C for MLOADX call
                                     :CALL(MLOADX); in: [E: offset, C: length] out: [A: value, E: new offset]
     ; increase to PC the length of the read bytes
     PC + D => PC
@@ -250,7 +236,7 @@ opDUP1:
     A               :MSTORE(SP++); [duplicated_value(A) => SP]
 
     ; check stack overflow
-    %CALLDATA_OFFSET - SP       :JMPN(stackOverflow, readCode)
+    %MAX_STACK_SIZE - SP       :JMPN(stackOverflow, readCode)
 
 opDUP2:
 
@@ -262,7 +248,7 @@ opDUP2:
 
     $ => A                          :MLOAD(SP-2)
     A                               :MSTORE(SP++)
-    %CALLDATA_OFFSET - SP           :JMPN(stackOverflow, readCode)
+    %MAX_STACK_SIZE - SP           :JMPN(stackOverflow, readCode)
 
 opDUP3:
 
@@ -274,7 +260,7 @@ opDUP3:
 
     $ => A                          :MLOAD(SP-3)
     A                               :MSTORE(SP++)
-    %CALLDATA_OFFSET - SP           :JMPN(stackOverflow, readCode)
+    %MAX_STACK_SIZE - SP           :JMPN(stackOverflow, readCode)
 
 opDUP4:
 
@@ -286,7 +272,7 @@ opDUP4:
 
     $ => A                          :MLOAD(SP-4)
     A                               :MSTORE(SP++)
-    %CALLDATA_OFFSET - SP           :JMPN(stackOverflow, readCode)
+    %MAX_STACK_SIZE - SP           :JMPN(stackOverflow, readCode)
 
 opDUP5:
 
@@ -298,7 +284,7 @@ opDUP5:
 
     $ => A                          :MLOAD(SP-5)
     A                               :MSTORE(SP++)
-    %CALLDATA_OFFSET - SP           :JMPN(stackOverflow, readCode)
+    %MAX_STACK_SIZE - SP           :JMPN(stackOverflow, readCode)
 
 opDUP6:
 
@@ -310,7 +296,7 @@ opDUP6:
 
     $ => A                          :MLOAD(SP-6)
     A                               :MSTORE(SP++)
-    %CALLDATA_OFFSET - SP           :JMPN(stackOverflow, readCode)
+    %MAX_STACK_SIZE - SP           :JMPN(stackOverflow, readCode)
 
 opDUP7:
 
@@ -322,7 +308,7 @@ opDUP7:
 
     $ => A                          :MLOAD(SP-7)
     A                               :MSTORE(SP++)
-    %CALLDATA_OFFSET - SP           :JMPN(stackOverflow, readCode)
+    %MAX_STACK_SIZE - SP           :JMPN(stackOverflow, readCode)
 
 opDUP8:
 
@@ -334,7 +320,7 @@ opDUP8:
 
     $ => A                          :MLOAD(SP-8)
     A                               :MSTORE(SP++)
-    %CALLDATA_OFFSET - SP           :JMPN(stackOverflow, readCode)
+    %MAX_STACK_SIZE - SP           :JMPN(stackOverflow, readCode)
 
 opDUP9:
 
@@ -346,7 +332,7 @@ opDUP9:
 
     $ => A                          :MLOAD(SP-9)
     A                               :MSTORE(SP++)
-    %CALLDATA_OFFSET - SP           :JMPN(stackOverflow, readCode)
+    %MAX_STACK_SIZE - SP           :JMPN(stackOverflow, readCode)
 
 opDUP10:
 
@@ -358,7 +344,7 @@ opDUP10:
 
     $ => A                          :MLOAD(SP-10)
     A                               :MSTORE(SP++)
-    %CALLDATA_OFFSET - SP           :JMPN(stackOverflow, readCode)
+    %MAX_STACK_SIZE - SP           :JMPN(stackOverflow, readCode)
 
 opDUP11:
 
@@ -370,7 +356,7 @@ opDUP11:
 
     $ => A                          :MLOAD(SP-11)
     A                               :MSTORE(SP++)
-    %CALLDATA_OFFSET - SP           :JMPN(stackOverflow, readCode)
+    %MAX_STACK_SIZE - SP           :JMPN(stackOverflow, readCode)
 
 opDUP12:
 
@@ -382,7 +368,7 @@ opDUP12:
 
     $ => A                          :MLOAD(SP-12)
     A                               :MSTORE(SP++)
-    %CALLDATA_OFFSET - SP           :JMPN(stackOverflow, readCode)
+    %MAX_STACK_SIZE - SP           :JMPN(stackOverflow, readCode)
 
 opDUP13:
 
@@ -394,7 +380,7 @@ opDUP13:
 
     $ => A                          :MLOAD(SP-13)
     A                               :MSTORE(SP++)
-    %CALLDATA_OFFSET - SP           :JMPN(stackOverflow, readCode)
+    %MAX_STACK_SIZE - SP           :JMPN(stackOverflow, readCode)
 
 opDUP14:
 
@@ -406,7 +392,7 @@ opDUP14:
 
     $ => A                          :MLOAD(SP-14)
     A                               :MSTORE(SP++)
-    %CALLDATA_OFFSET - SP           :JMPN(stackOverflow, readCode)
+    %MAX_STACK_SIZE - SP           :JMPN(stackOverflow, readCode)
 
 opDUP15:
 
@@ -418,7 +404,7 @@ opDUP15:
 
     $ => A                          :MLOAD(SP-15)
     A                               :MSTORE(SP++)
-    %CALLDATA_OFFSET - SP           :JMPN(stackOverflow, readCode)
+    %MAX_STACK_SIZE - SP           :JMPN(stackOverflow, readCode)
 
 opDUP16:
 
@@ -430,7 +416,7 @@ opDUP16:
 
     $ => A                          :MLOAD(SP-16)
     A                               :MSTORE(SP++)
-    %CALLDATA_OFFSET - SP           :JMPN(stackOverflow, readCode)
+    %MAX_STACK_SIZE - SP           :JMPN(stackOverflow, readCode)
 
 /**
  * @link [https://www.evm.codes/#90?fork=berlin]

@@ -1,6 +1,15 @@
+/**
+ * @link [https://www.evm.codes/precompiled#0x04?fork=berlin]
+ * @zk-counters
+ *  - dynamic steps: 100
+ *  - dynamic binary: 1
+ * @process-precompiled
+ *  - stack input: [data]
+ *  - stack output: [data]
+ */
 IDENTITY:
     %MAX_CNT_STEPS - STEP - 100         :JMPN(outOfCountersStep)
-    %MAX_CNT_BINARY - CNT_BINARY - 1   :JMPN(outOfCountersBinary)
+    %MAX_CNT_BINARY - CNT_BINARY - 1    :JMPN(outOfCountersBinary)
     ; Move balances if value > 0 just before executing the contract CALL
     $ => B          :MLOAD(txValue)
     0 => A
@@ -16,21 +25,25 @@ IDENTITY:
     $ => A          :MLOAD(arithRes1)
 
     GAS - %IDENTITY_WORD_GAS*A => GAS   :JMPN(outOfGas)
-    0 => B, E, A    :MSTORE(retDataOffset)
+    0 => E, D       :MSTORE(retDataOffset)
     C               :MSTORE(retDataLength)
-    %CALLDATA_OFFSET => SP
+    32              :MSTORE(readXFromCalldataLength)
 
 IDENTITYloop:
     %MAX_CNT_STEPS - STEP - 100         :JMPN(outOfCountersStep)
     ; Copy from calldata to memory
     C               :JMPZ(IDENTITYreturn)
     C - 32          :JMPN(IDENTITYfinal)
-    $ => B          :MLOAD(SP++)
-    B               :MSTORE(bytesToStore), CALL(MSTORE32); in: [bytesToStore, E: offset] out: [E: new offset]
+    D               :MSTORE(readXFromCalldataOffset), CALL(readFromCalldataOffset); in: [readXFromCalldataOffset: offset value, readXFromCalldataLength: length value], out: [readXFromCalldataResult: result value]
+    $ => A          :MLOAD(readXFromCalldataResult)
+    D + 32 => D
+    A               :MSTORE(bytesToStore), CALL(MSTORE32); in: [bytesToStore, E: offset] out: [E: new offset]
     C - 32 => C     :JMP(IDENTITYloop)
 
 IDENTITYfinal:
-    $ => A          :MLOAD(SP)
+    C               :MSTORE(readXFromCalldataLength)
+    D               :MSTORE(readXFromCalldataOffset), CALL(readFromCalldataOffset); in: [readXFromCalldataOffset: offset value, readXFromCalldataLength: length value], out: [readXFromCalldataResult: result value]
+    $ => A          :MLOAD(readXFromCalldataResult)
     A               :MSTORE(bytesToStore), CALL(MSTOREX); in: [bytesToStore, E: offset, C: length] out: [E: new offset]
 
 IDENTITYreturn:

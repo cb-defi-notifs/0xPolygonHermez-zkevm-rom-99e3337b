@@ -1,0 +1,331 @@
+; CALLDATACOPY: memory[destOffset:destOffset+length] = msg.data[offset:offset+length]
+;       | destOffset | offset | length | ....
+; SP          0          1         2     .....
+
+start:
+
+        STEP => A
+        0 :ASSERT
+
+        ; TEST 1: size = 20, offset = 0, destOffset = 0, no MEM (simple test)
+
+        0 => SP
+        20              :MSTORE(SP++)   ;size
+        0               :MSTORE(SP++)   ;offset
+        32              :MSTORE(SP)    ;destOffset
+        100000000 => GAS
+
+        :CALL(fillCalldataPattern)
+        :CALL(fillMemPattern0)
+        :CALL(opCALLDATACOPY2)
+
+        0 => E
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MLOAD(MEM:E)
+        0x1234512345123451234512345123451234512345000000000000000000000000n     :MLOAD(MEM:E+1)
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MLOAD(MEM:E+2)
+
+        ; TEST 2: size = 20, offset = 4, destOffset = 0, no MEM (offset > 0, size + offset < 32)
+
+        0 => SP
+        20              :MSTORE(SP++)   ;size
+        4               :MSTORE(SP++)   ;offset
+        32               :MSTORE(SP)     ;destOffset
+
+        :CALL(fillCalldataPattern)
+        :CALL(fillMemPattern0)
+        :CALL(opCALLDATACOPY2)
+
+        0 => E
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MLOAD(MEM:E)
+        0x4512345123451234512345123451234512345123000000000000000000000000n     :MLOAD(MEM:E+1)
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MLOAD(MEM:E+2)
+
+        ; TEST 3: size = 20, offset = 0, destOffset = 7, no MEM (destOffset > 0, size + destOffset < 32)
+
+        0 => SP
+        20              :MSTORE(SP++)   ;size
+        0               :MSTORE(SP++)   ;offset
+        32+7            :MSTORE(SP)     ;destOffset
+
+        :CALL(fillCalldataPattern)
+        :CALL(fillMemPattern0)
+        :CALL(opCALLDATACOPY2)
+
+        0 => E
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MLOAD(MEM:E)
+        0x0000000000000012345123451234512345123451234512345123450000000000n     :MLOAD(MEM:E+1)
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MLOAD(MEM:E+2)
+
+        ; TEST 4: size = 40, offset = 0, destOffset = 0, no MEM (size > 32)
+
+        0 => SP
+        40              :MSTORE(SP++)   ;size
+        0               :MSTORE(SP++)   ;offset
+        32              :MSTORE(SP)     ;destOffset
+
+        :CALL(fillCalldataPattern)
+        :CALL(fillMemPattern0)
+        :CALL(opCALLDATACOPY2)
+
+        0 => E
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MLOAD(MEM:E)
+        0x1234512345123451234512345123451234512345123451234512345123451234n     :MLOAD(MEM:E+1)
+        0x6789678967896789000000000000000000000000000000000000000000000000n     :MLOAD(MEM:E+2)
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MLOAD(MEM:E+3)
+
+        ; TEST 5: size = 66, offset = 31, destOffset = 0, no MEM (size + offset > 32)
+
+        0 => SP
+        66              :MSTORE(SP++)   ;size
+        15              :MSTORE(SP++)   ;offset
+        32              :MSTORE(SP)     ;destOffset
+
+        :CALL(fillCalldataPattern)
+        :CALL(fillMemPattern0)
+        :CALL(opCALLDATACOPY2)
+
+        0 => E
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MLOAD(MEM:E)
+        0x1234512345123451234512345123451234678967896789678967896789678967n     :MLOAD(MEM:E+1)
+        0x8967896789678967896789678967896789123456789123456789123456789123n     :MLOAD(MEM:E+2)
+        0x4567000000000000000000000000000000000000000000000000000000000000n     :MLOAD(MEM:E+3)
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MLOAD(MEM:E+4)
+
+        ; TEST 6: size = 65, offset = 3, destOffset = 30, no MEM (size + offset > 32, size + destOffset > 32)
+
+        0 => SP
+        65              :MSTORE(SP++)   ;size
+        3               :MSTORE(SP++)   ;offset
+        32+30           :MSTORE(SP)     ;destOffset
+
+        :CALL(fillCalldataPattern)
+        :CALL(fillMemPattern0)
+        :CALL(opCALLDATACOPY2)
+
+        0 => E
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MLOAD(MEM:E)
+        0x0000000000000000000000000000000000000000000000000000000000002345n     :MLOAD(MEM:E+1)
+        0x1234512345123451234512345123451234512345123451234512346789678967n     :MLOAD(MEM:E+2)
+        0x8967896789678967896789678967896789678967896789678967891234567800n     :MLOAD(MEM:E+3)
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MLOAD(MEM:E+4)
+
+        ; TEST 7: size = 20, offset = 0, destOffset = 0, set MEM (simple test)
+
+        0 => SP
+        20              :MSTORE(SP++)   ;size
+        0               :MSTORE(SP++)   ;offset
+        32              :MSTORE(SP)     ;destOffset
+
+        :CALL(fillCalldataPattern)
+        :CALL(fillMemPattern)
+        :CALL(opCALLDATACOPY2)
+
+        0 => E
+        0x1111111111111111111111111111111111111111111111111111111111111111n     :MLOAD(MEM:E)
+        0x1234512345123451234512345123451234512345222222222222222222222222n     :MLOAD(MEM:E+1)
+        0x3333333333333333333333333333333333333333333333333333333333333333n     :MLOAD(MEM:E+2)
+
+        ; TEST 8: size = 20, offset = 4, destOffset = 0, set MEM (offset > 0, size + offset < 32)
+
+        0 => SP
+        20              :MSTORE(SP++)   ;size
+        4               :MSTORE(SP++)   ;offset
+        32              :MSTORE(SP)     ;destOffset
+
+        :CALL(fillCalldataPattern)
+        :CALL(fillMemPattern)
+        :CALL(opCALLDATACOPY2)
+
+        0 => E
+        0x1111111111111111111111111111111111111111111111111111111111111111n     :MLOAD(MEM:E)
+        0x4512345123451234512345123451234512345123222222222222222222222222n     :MLOAD(MEM:E+1)
+        0x3333333333333333333333333333333333333333333333333333333333333333n     :MLOAD(MEM:E+2)
+
+        ; TEST 9: size = 20, offset = 0, destOffset = 7, set MEM (destOffset > 0, size + destOffset < 32)
+
+        0 => SP
+        20              :MSTORE(SP++)   ;size
+        0               :MSTORE(SP++)   ;offset
+        32+7            :MSTORE(SP)     ;destOffset
+
+        :CALL(fillCalldataPattern)
+        :CALL(fillMemPattern)
+        :CALL(opCALLDATACOPY2)
+
+        0 => E
+        0x1111111111111111111111111111111111111111111111111111111111111111n     :MLOAD(MEM:E)
+        0x2222222222222212345123451234512345123451234512345123452222222222n     :MLOAD(MEM:E+1)
+        0x3333333333333333333333333333333333333333333333333333333333333333n     :MLOAD(MEM:E+2)
+
+        ; TEST 10: size = 40, offset = 0, destOffset = 0, set MEM (size > 32)
+
+        0 => SP
+        40              :MSTORE(SP++)   ;size
+        0               :MSTORE(SP++)   ;offset
+        32              :MSTORE(SP)     ;destOffset
+
+        :CALL(fillCalldataPattern)
+        :CALL(fillMemPattern)
+        :CALL(opCALLDATACOPY2)
+
+        0 => E
+        0x1111111111111111111111111111111111111111111111111111111111111111n     :MLOAD(MEM:E)
+        0x1234512345123451234512345123451234512345123451234512345123451234n     :MLOAD(MEM:E+1)
+        0x6789678967896789333333333333333333333333333333333333333333333333n     :MLOAD(MEM:E+2)
+        0x4444444444444444444444444444444444444444444444444444444444444444n     :MLOAD(MEM:E+3)
+
+        ; TEST 11: size = 66, offset = 31, destOffset = 0, set MEM (size + offset > 32)
+
+        0 => SP
+        66              :MSTORE(SP++)   ;size
+        15              :MSTORE(SP++)   ;offset
+        32              :MSTORE(SP)     ;destOffset
+
+        :CALL(fillCalldataPattern)
+        :CALL(fillMemPattern)
+        :CALL(opCALLDATACOPY2)
+
+        0 => E
+        0x1111111111111111111111111111111111111111111111111111111111111111n     :MLOAD(MEM:E)
+        0x1234512345123451234512345123451234678967896789678967896789678967n     :MLOAD(MEM:E+1)
+        0x8967896789678967896789678967896789123456789123456789123456789123n     :MLOAD(MEM:E+2)
+        0x4567444444444444444444444444444444444444444444444444444444444444n     :MLOAD(MEM:E+3)
+        0x5555555555555555555555555555555555555555555555555555555555555555n     :MLOAD(MEM:E+4)
+        ; TEST 12: size = 65, offset = 3, destOffset = 30, set MEM (size + offset > 32, size + destOffset > 32)
+
+        0 => SP
+        65              :MSTORE(SP++)   ;size
+        3               :MSTORE(SP++)   ;offset
+        32+30           :MSTORE(SP)     ;destOffset
+
+        :CALL(fillCalldataPattern)
+        :CALL(fillMemPattern)
+        :CALL(opCALLDATACOPY2)
+
+        0 => E
+        0x1111111111111111111111111111111111111111111111111111111111111111n     :MLOAD(MEM:E)
+        0x2222222222222222222222222222222222222222222222222222222222222345n     :MLOAD(MEM:E+1)
+        0x1234512345123451234512345123451234512345123451234512346789678967n     :MLOAD(MEM:E+2)
+        0x8967896789678967896789678967896789678967896789678967891234567844n     :MLOAD(MEM:E+3)
+        0x5555555555555555555555555555555555555555555555555555555555555555n     :MLOAD(MEM:E+4)
+
+        ; TEST 13: size = 60, offset = 0, destOffset = 0, set MEM (txCalldataLen < size)
+
+        0 => SP
+        60              :MSTORE(SP++)   ;size
+        0               :MSTORE(SP++)   ;offset
+        32              :MSTORE(SP)     ;destOffset
+
+        :CALL(fillCalldataPattern2)
+        :CALL(fillMemPattern)
+        :CALL(opCALLDATACOPY2)
+
+        0 => E
+        0x1111111111111111111111111111111111111111111111111111111111111111n     :MLOAD(MEM:E)
+        0x1234512345123451234512345123451234512345123451234512345123451234n     :MLOAD(MEM:E+1)
+        0x6789678967896789678967896789678967890000000000000000000033333333n     :MLOAD(MEM:E+2)
+        0x4444444444444444444444444444444444444444444444444444444444444444n     :MLOAD(MEM:E+3)
+
+        ; TEST 14: size = 90, offset = 0, destOffset = 0, set MEM (txCalldataLen < size)
+        0 => SP
+        90              :MSTORE(SP++)   ;size
+        0               :MSTORE(SP++)   ;offset
+        0               :MSTORE(SP)     ;destOffset
+
+        :CALL(fillCalldataPattern2)
+        :CALL(fillMemPattern)
+        :CALL(opCALLDATACOPY2)
+
+        0 => E
+        0x1234512345123451234512345123451234512345123451234512345123451234n     :MLOAD(MEM:E)
+        0x6789678967896789678967896789678967890000000000000000000000000000n     :MLOAD(MEM:E+1)
+        0x0000000000000000000000000000000000000000000000000000333333333333n     :MLOAD(MEM:E+2)
+
+        ; TEST 15: size = 40, offset = 20, destOffset = 10, set MEM (txCalldataLen < size)
+
+        0 => SP
+        40             :MSTORE(SP++)   ;size
+        49             :MSTORE(SP++)   ;offset
+        1              :MSTORE(SP)     ;destOffset
+
+        :CALL(fillCalldataPattern2)
+        :CALL(fillMemPattern)
+        :CALL(opCALLDATACOPY2)
+
+        0 => E
+        0x1189000000000000000000000000000000000000000000000000000000000000n     :MLOAD(MEM:E)
+        0x0000000000000000002222222222222222222222222222222222222222222222n     :MLOAD(MEM:E+1)
+
+        ; TEST 16: size = 20, offset = 52, destOffset = 1, set MEM (offset > txCalldataLen)
+
+        0 => SP
+        20             :MSTORE(SP++)   ;size
+        52             :MSTORE(SP++)   ;offset
+        32+1              :MSTORE(SP)     ;destOffset
+
+        :CALL(fillCalldataPattern2)
+        :CALL(fillMemPattern)
+        :CALL(opCALLDATACOPY2)
+
+        0 => E
+        0x1111111111111111111111111111111111111111111111111111111111111111n     :MLOAD(MEM:E)
+        0x2200000000000000000000000000000000000000002222222222222222222222n     :MLOAD(MEM:E+1)
+        0x3333333333333333333333333333333333333333333333333333333333333333n     :MLOAD(MEM:E+2)
+
+0 => A,B,C,D,E,CTX, SP, PC, GAS,  SR, HASHPOS, RR ; Set all registers to 0
+                                                                        :JMP(finalizeExecution)
+
+fillCalldataPattern:
+        1024 => SP
+        0x1234512345123451234512345123451234512345123451234512345123451234n     :MSTORE(SP++)
+        0x6789678967896789678967896789678967896789678967896789678967896789n     :MSTORE(SP++)
+        0x1234567891234567891234567891234567891234567891234567891234567891n     :MSTORE(SP)
+        3 => SP
+        96                                                                      :MSTORE(txCalldataLen), RETURN
+
+fillCalldataPattern2:
+        1024 => SP
+        0x1234512345123451234512345123451234512345123451234512345123451234n     :MSTORE(SP++)
+        0x6789678967896789678967896789678967890000000000000000000000000000n     :MSTORE(SP++)
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MSTORE(SP)
+        3 => SP
+        50                                                                      :MSTORE(txCalldataLen), RETURN
+
+fillMemPattern0:
+
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MSTORE(MEM:E)
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MSTORE(MEM:E+1)
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MSTORE(MEM:E+2)
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MSTORE(MEM:E+3)
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MSTORE(MEM:E+4)
+        0x0000000000000000000000000000000000000000000000000000000000000000n     :MSTORE(MEM:E+5), RETURN
+
+fillMemPattern:
+
+        0x1111111111111111111111111111111111111111111111111111111111111111n     :MSTORE(MEM:E)
+        0x2222222222222222222222222222222222222222222222222222222222222222n     :MSTORE(MEM:E+1)
+        0x3333333333333333333333333333333333333333333333333333333333333333n     :MSTORE(MEM:E+2)
+        0x4444444444444444444444444444444444444444444444444444444444444444n     :MSTORE(MEM:E+3)
+        0x5555555555555555555555555555555555555555555555555555555555555555n     :MSTORE(MEM:E+4)
+        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn     :MSTORE(MEM:E+5), RETURN
+
+INCLUDE "../main/main.zkasm"
+
+VAR GLOBAL tmpSHXZkPCtest
+/**
+ * @link [https://www.evm.codes/#37?fork=berlin]
+ * @zk-counters
+ *  - 100 steps
+ *  - 2 binary
+ * @process-opcode
+ *  - stack input: [destOffset, offset, size]
+ *  - stack output: []
+ */
+opCALLDATACOPY2:
+    RR              :MSTORE(tmpSHXZkPCtest)
+                    :CALL(opCALLDATACOPY)
+
+opCALLDATACOPYend:
+
+    $ => RR         :MLOAD(tmpSHXZkPCtest)
+                    :RETURN
